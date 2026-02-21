@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Heart, Menu, Search, ShoppingCart, X } from 'lucide-react';
-import { Link, NavLink } from 'react-router';
+import { Link, NavLink, useNavigate } from 'react-router';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Button } from './ui/button';
 import { Icon } from '@iconify/react';
@@ -8,10 +8,13 @@ import { DropdownMenuItem, DropdownMenuLabel } from '@radix-ui/react-dropdown-me
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import ProductSearch from './sections/ProductSearch';
+import { useAuth } from '../hooks/useAuth';
 
 export default function NavBar() {
   const navbar = useRef<HTMLElement>(null);
   const themeButton = useRef<HTMLLabelElement>(null);
+  const navigate = useNavigate();
+  const { currentUser, logout, loading } = useAuth();
   const { wishList } = useSelector((state: RootState) => state.wishlist);
   const { cart } = useSelector((state: RootState) => state.cart);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -19,6 +22,16 @@ export default function NavBar() {
   const [position, setPosition] = React.useState("bottom")
 
   const [dark, setDark] = useState("light")
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/auth/login');
+      setIsMobileMenuOpen(false);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const handleChange = () => {
     setDark((theme) => theme === "light" ? "dark" : "light")
@@ -42,7 +55,7 @@ export default function NavBar() {
     { to: '/', label: 'Home' },
     { to: '/contact', label: 'Contact' },
     { to: '/about', label: 'About' },
-    { to: '/signup', label: 'Sign Up' },
+    ...(currentUser ? [] : [{ to: '/auth/signup', label: 'Sign Up' }]),
   ];
 
   // scroll event listener for navbar shadow
@@ -62,34 +75,15 @@ export default function NavBar() {
     // };
   }, []);
 
-  const user = null
-
-  const allNavLinks = navLinks.map((link) => {
-    if (!user) {
-      return (
-        <NavLink
-          key={link.to}
-          to={link.to}
-          className={({isActive})=> `${isActive? "active":  ""} buttons text-[16px] font-medium leading-6`}
-        >
-          {link.label}
-        </NavLink>
-      );
-    }
-
-    if (link.to !== "/signup" && user) {
-      return (
-        <NavLink
-          key={link.to}
-          to={link.to}
-          className={({isActive})=> `${isActive? "active":  ""} buttons text-[16px] font-medium leading-6`}
-        >
-          {link.label}
-        </NavLink>
-      );
-    }
-
-  });
+  const allNavLinks = navLinks.map((link) => (
+    <NavLink
+      key={link.to}
+      to={link.to}
+      className={({ isActive }) => `${isActive ? "active" : ""} buttons text-[16px] font-medium leading-6`}
+    >
+      {link.label}
+    </NavLink>
+  ));
 
   return (
 
@@ -113,7 +107,7 @@ export default function NavBar() {
         <div className="container">
           <div className="flex items-center justify-between">
             <p className="font-poppins sm:text-start md:text-center text-amber-50 text-[14px] ">Summer Sale Free Delivery - OFF 50%! <span><Link className=" underline underline-offset-1 font-poppins text-[14px] font-semibold hidden lg:block" to="/shop">Shop Now</Link></span></p>
-           <div className=" block lg:hidden">
+            <div className=" block lg:hidden">
               <p><Link className=" underline underline-offset-1 font-poppins text-[14px] font-semibold block lg:hidden" to="/shop">Shop Now</Link></p>
             </div>
             <select className="font-grotesk text-amber-50 self-end">
@@ -153,26 +147,26 @@ export default function NavBar() {
 
             {/* Right: Action Icons */}
             <div className="flex items-center gap-2 md:gap-3 lg:hidden  ">
-              <ProductSearch/>
+              <ProductSearch />
 
               <Link to={"/wishlist"} className='p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors relative'>
-                    <Heart size={25} color="#000000" strokeWidth={2} absoluteStrokeWidth className='dark:stroke-white' />
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                      {wishList.length}
-                    </span>
+                <Heart size={25} color="#000000" strokeWidth={2} absoluteStrokeWidth className='dark:stroke-white' />
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  {wishList.length}
+                </span>
               </Link>
 
-               <Link to={"cart"}>
-                    <button
-                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors relative"
-                      aria-label="Shopping cart"
-                    >
-                      <ShoppingCart size={25} color="#000000" strokeWidth={2} className='dark:stroke-white' />
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                        {cart.length}
-                      </span>
-                    </button>
-                  </Link>
+              <Link to={"cart"}>
+                <button
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors relative"
+                  aria-label="Shopping cart"
+                >
+                  <ShoppingCart size={25} color="#000000" strokeWidth={2} className='dark:stroke-white' />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    {cart.length}
+                  </span>
+                </button>
+              </Link>
             </div>
           </div>
 
@@ -219,22 +213,44 @@ export default function NavBar() {
                   <DropdownMenu>
                     <DropdownMenuTrigger className='focus:outline-0 w-10 h-10 flex items-center justify-center   rounded-full data-[state=open]:bg-button2 data-[state=open]:text-white cursor-pointer  '><Icon icon="lucide:user" width="30" height="30" /></DropdownMenuTrigger>
                     <DropdownMenuContent align='end' className='min-w-56 pt-4.5 pl-5 pb-2.5 pr-3 bg-[rgba(0,0,0,0.50)] backdrop-blur-[100px] text-white  border-none space-y-[13px]' >
-                      <DropdownMenuLabel >
-                        <Link className='flex items-center justify-start gap-4' to={"/account"}><Icon icon="lucide:user" width="30" height="30" />Manage My Account</Link>
-                      </DropdownMenuLabel>
+                      {currentUser ? (
+                        <>
+                          <DropdownMenuLabel>
+                            <p className='text-sm text-gray-300'>{currentUser.email}</p>
+                          </DropdownMenuLabel>
 
-                      <DropdownMenuItem>
-                        <Link className='flex items-center justify-start gap-4' to={"/#"}><Icon icon="mage:shopping-bag" width="30" height="30" />My Order</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Link className='flex items-center justify-start gap-4' to={"/#"}><Icon icon="material-symbols-light:cancel-outline" width="30" height="30" />My Cancellation</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Link className='flex items-center justify-start gap-4' to={"/#"}><Icon icon="stash:star" width="30" height="30" /> My Reviews</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Link className='flex items-center justify-start gap-4' to={"#"}><Icon icon="tabler:logout-2" width="30" height="30" /> Log Out</Link>
-                      </DropdownMenuItem>
+                          <DropdownMenuLabel >
+                            <Link className='flex items-center justify-start gap-4' to={"/account"}><Icon icon="lucide:user" width="30" height="30" />Manage My Account</Link>
+                          </DropdownMenuLabel>
+
+                          <DropdownMenuItem>
+                            <Link className='flex items-center justify-start gap-4' to={"/#"}><Icon icon="mage:shopping-bag" width="30" height="30" />My Order</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Link className='flex items-center justify-start gap-4' to={"/#"}><Icon icon="material-symbols-light:cancel-outline" width="30" height="30" />My Cancellation</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Link className='flex items-center justify-start gap-4' to={"/#"}><Icon icon="stash:star" width="30" height="30" /> My Reviews</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <button
+                              onClick={handleLogout}
+                              className='flex items-center cursor-pointer justify-start gap-4 w-full'
+                            >
+                              <Icon icon="tabler:logout-2" width="30" height="30" /> Log Out
+                            </button>
+                          </DropdownMenuItem>
+                        </>
+                      ) : (
+                        <>
+                          <DropdownMenuLabel>
+                            <Link className='flex items-center justify-start gap-4' to={"/auth/login"}><Icon icon="lucide:user" width="30" height="30" />Sign In</Link>
+                          </DropdownMenuLabel>
+                          <DropdownMenuLabel>
+                            <Link className='flex items-center justify-start gap-4' to={"/auth/signup"}><Icon icon="lucide:user-plus" width="30" height="30" />Create Account</Link>
+                          </DropdownMenuLabel>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
 
@@ -267,6 +283,19 @@ export default function NavBar() {
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
             <div className="container mx-auto px-4 py-4">
+              <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button className=' w-full mb-3 ' variant="outline">Mood</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuSeparator />
+                      <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                        <DropdownMenuRadioItem onClick={() => handleTheme("light")} value="bottom"> Light </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => handleTheme("dark")} value="right"> Dark </DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
               <ul className="space-y-2">
                 {navLinks.map((link) => (
                   <li key={link.to}>
@@ -280,18 +309,15 @@ export default function NavBar() {
                   </li>
                 ))}
                 <div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button className=' w-full ' variant="outline">Mood</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                        <DropdownMenuRadioItem onClick={() => handleTheme("light")} value="bottom"> Light </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem onClick={() => handleTheme("dark")} value="right"> Dark </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {currentUser && (
+                    <Button
+                      onClick={handleLogout}
+                      className=' w-full bg-red-700 hover:bg-red-600 mt-3 dark:bg-red-700 dark:hover:bg-red-600 cursor-pointer '
+                      variant="outline"
+                    >
+                      Log Out
+                    </Button>
+                  )}
                 </div>
               </ul>
             </div>

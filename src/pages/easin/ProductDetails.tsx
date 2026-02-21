@@ -162,13 +162,13 @@ const ProductDetails: React.FC = () => {
 							))}
 						</div>
 
-						<div className="max-w-[500px] h-[550px] py-[142px] flex items-center justify-center bg-secondary rounded-sm px-[27px]">
+						<div className="max-w-fit h-fit py-[142px] flex items-center justify-center bg-secondary rounded-sm px-[27px]">
 							<img src={data?.images[imageIndex]} alt="image" />
 						</div>
 					</div>
 
 					{/* Right Side text */}
-					<div className="max-w-[400px] ">
+					<div className=" max-w-fit lg:max-w-[400px] ">
 						<div className="space-y-4 border-b mt-8 lg:mt-0 ">
 							<h2 className="text-2xl font-semibold font-inter">
 								{data?.title}

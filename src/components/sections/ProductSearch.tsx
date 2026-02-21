@@ -65,20 +65,20 @@ export default function ProductSearch() {
 	return (
 		<div>
 			{/* Header with Search Button for Mobile */}
-			<div className="md:hidden">
+			<div className="lg:hidden">
 				<div className="flex items-center justify-between px-4 py-3">
 					<button
 						onClick={() => setShowMobileSearch(true)}
 						className="p-2 hover:bg-gray-100 dark:hover:bg-transparent cursor-pointer rounded-lg transition-colors"
 					>
-						<Search className="w-5 h-5 text-gray-600 dark:text-amber-50" />
+						<Search className="w-6 h-6 text-black font-bold dark:text-amber-50" />
 					</button>
 				</div>
 			</div>
 
 			{/* Mobile Search Overlay */}
 			{showMobileSearch && (
-				<div className="fixed inset-0 bg-white dark:bg-slate-950 z-50 md:hidden">
+				<div className="fixed inset-0 bg-white dark:bg-slate-950 z-50 lg:hidden">
 					<div className="flex flex-col h-full">
 						{/* Mobile Search Header */}
 						<div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
@@ -172,7 +172,7 @@ export default function ProductSearch() {
 			)}
 
 			{/* Desktop Search */}
-			<div className="hidden md:block ">
+			<div className="hidden lg:block ">
 				<div className="w-[243px] h-[38px] mx-auto" ref={searchRef}>
 					<div className="relative">
 						{/* Search Input */}

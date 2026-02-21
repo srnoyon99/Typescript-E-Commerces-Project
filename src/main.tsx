@@ -7,15 +7,16 @@ import { store } from './store/store.ts'
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import AuthProvider from './context/AuthContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     
-
+  <AuthProvider>
     <Provider store={store}>
     <App />
-
     </Provider>
+  </AuthProvider>
     
   </StrictMode>,
 )
