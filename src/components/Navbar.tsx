@@ -14,10 +14,10 @@ export default function NavBar() {
   const navbar = useRef<HTMLElement>(null);
   const themeButton = useRef<HTMLLabelElement>(null);
   const navigate = useNavigate();
-  const { currentUser, logout, loading } = useAuth();
+  const { currentUser, logout } = useAuth();
   const { wishList } = useSelector((state: RootState) => state.wishlist);
   const { cart } = useSelector((state: RootState) => state.cart);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [position, setPosition] = React.useState("bottom")
 
