@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams, useLocation } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
