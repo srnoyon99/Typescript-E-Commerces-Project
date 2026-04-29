@@ -153,41 +153,76 @@ const CartTotalBox: React.FC = () => {
     const navigate = useNavigate();
     const { cart } = useSelector((state: RootState) => state.cart);
     const subtotal = cart.reduce((acc, item) => acc + item.subtotal, 0);
-    // Example total (650*1 + 550*2 = 1750) 
-    const city:string = "Inside Dhaka";
+    const city: string = "Inside Dhaka";
     const shipping = city === "Outside Dhaka" ? 50 : 100;
-    // Example shipping cost 
     const total = subtotal + shipping;
 
+    const isProfileComplete = () => {
+        const savedProfile = localStorage.getItem("userProfile");
+        if (!savedProfile) {
+            return false;
+        }
+
+        const profile = JSON.parse(savedProfile) as {
+            firstName: string;
+            lastName: string;
+            email: string;
+            number: string;
+            address: string;
+            city: string;
+            postalCode: string;
+        };
+
+        return !!(
+            profile.firstName?.trim() &&
+            profile.lastName?.trim() &&
+            profile.email?.trim() &&
+            profile.number?.trim() &&
+            profile.address?.trim() &&
+            profile.city?.trim() &&
+            profile.postalCode?.trim()
+        );
+    };
+
     const handleProceedToCheckout = () => {
-        navigate('/checkout');
+        if (isProfileComplete()) {
+            navigate('/checkout');
+        } else {
+            navigate('/account', { state: { from: '/checkout' } });
+        }
     };
 
     return (
         <div className='flex justify-end font-poppins mb-20 '>
             <div className='border border-black py-8 px-6 rounded-sm w-full max-w-full lg:max-w-sm'>
-                <h3 className='text-xl font-medium mb-6'>Cart Total</h3> {/* Subtotal Row */}
+                <h3 className='text-xl font-medium mb-6'>Cart Total</h3>
                 <div className='flex justify-between py-2 border-b border-gray-300'>
                     <p>Subtotal:</p> <p>${subtotal.toFixed(2)}</p>
-                </div> {/* Shipping Row */}
+                </div>
                 <div className='flex justify-between flex-col gap-2 py-2 border-b border-gray-300'>
                     <p>Shipping:</p>
                     <div className='flex justify-between flex-col gap-2'>
                         <ul>
                             <li>
-                        <input type="radio" name="shipping" id="inside-dhaka " className=' cursor-pointer ' /> Inside Dhaka <span className=' ml-[154px] ' >${shipping}</span>
+                                <input type="radio" name="shipping" id="inside-dhaka" className=' cursor-pointer ' /> Inside Dhaka <span className=' ml-[154px] ' >${shipping}</span>
                             </li>
                             <li>
-                        <input type="radio" name="shipping" id="outside-dhaka" className=' cursor-pointer ' /> Outside Dhaka <span className=' ml-35 ' >${shipping}</span>
+                                <input type="radio" name="shipping" id="outside-dhaka" className=' cursor-pointer ' /> Outside Dhaka <span className=' ml-35 ' >${shipping}</span>
                             </li>
                         </ul>
                     </div>
-                </div> {/* Total Row */}
+                </div>
                 <div className='flex justify-between py-2 mb-6'>
                     <p className='font-medium'>Total:</p>
                     <p className='font-medium'>${total.toFixed(2)}</p>
-                </div> {/* Process to Checkout Button (Red/Primary Color) */}
-                <Button2 onClick={handleProceedToCheckout} className="w-full">Proceed To Checkout</Button2>
+                </div>
+                <button
+                    type="button"
+                    onClick={handleProceedToCheckout}
+                    className="w-full bg-button2 hover:bg-red-600 transition-all duration-300 cursor-pointer text-white font-medium font-poppins px-8 lg:px-12 py-2 text-nowrap lg:py-4 rounded-sm"
+                >
+                    Proceed To Checkout
+                </button>
             </div>
         </div>);
 }

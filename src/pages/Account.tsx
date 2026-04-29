@@ -7,7 +7,7 @@ import {
     BreadcrumbSeparator,
 } from "../components/ui/breadcrumb";
 import { SlashIcon } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 
 interface UserProfile {
@@ -21,6 +21,8 @@ interface UserProfile {
 }
 
 const Account: React.FC = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const { currentUser } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [profile, setProfile] = useState<UserProfile>({
@@ -33,6 +35,7 @@ const Account: React.FC = () => {
         postalCode: "",
     });
     const [tempProfile, setTempProfile] = useState<UserProfile>(profile);
+    const fromPath = (location.state as { from?: string } | undefined)?.from;
 
     // Load profile from localStorage on mount
     useEffect(() => {
@@ -51,6 +54,12 @@ const Account: React.FC = () => {
             setTempProfile(initialProfile);
         }
     }, [currentUser]);
+
+    useEffect(() => {
+        if (fromPath) {
+            setIsEditing(true);
+        }
+    }, [fromPath]);
 
     // Extract name from email if it contains a pattern like "firstname.lastname@domain.com"
     const extractNameFromEmail = (email: string) => {
@@ -81,14 +90,25 @@ const Account: React.FC = () => {
 
     const handleSaveChanges = () => {
         // Validate required fields
-        if (!tempProfile.firstName.trim() || !tempProfile.lastName.trim()) {
-            alert("First Name and Last Name are required");
+        if (
+            !tempProfile.firstName.trim() ||
+            !tempProfile.lastName.trim() ||
+            !tempProfile.number.trim() ||
+            !tempProfile.address.trim() ||
+            !tempProfile.city.trim() ||
+            !tempProfile.postalCode.trim()
+        ) {
+            alert("Please complete all required fields before saving.");
             return;
         }
 
         setProfile(tempProfile);
         localStorage.setItem("userProfile", JSON.stringify(tempProfile));
         setIsEditing(false);
+
+        if (fromPath) {
+            navigate(fromPath, { replace: true });
+        }
     };
 
     const userNameFromEmail = extractNameFromEmail(profile.email);
@@ -227,7 +247,7 @@ const Account: React.FC = () => {
                             {/* Email */}
                             <div>
                                 <label className="block text-sm mb-2">
-                                    Email <span className="text-red-500">*</span>
+                                    Gmail Address <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="email"
@@ -237,6 +257,9 @@ const Account: React.FC = () => {
                                     placeholder="Your email"
                                     className="w-full bg-gray-100 h-[50px] px-4 text-gray-600 outline-none opacity-60"
                                 />
+                                <p className="text-xs text-gray-500 mt-2">
+                                    Your login Gmail is saved and cannot be changed here.
+                                </p>
                             </div>
 
                             {/* Phone Number */}

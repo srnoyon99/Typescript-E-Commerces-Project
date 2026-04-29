@@ -2,8 +2,8 @@ import { Link, useNavigate } from "react-router"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "../../components/ui/breadcrumb"
 import { SlashIcon } from "lucide-react"
 import { useState, useEffect } from "react"
-import Button2 from "../../components/Button2"
-import { gamepad, monitor } from "../../constant/constant"
+import { useSelector } from "react-redux"
+import type { RootState } from "../../store/store"
 
 
 interface UserProfile {
@@ -104,7 +104,7 @@ const CheckOut: React.FC = () => {
                     <BillingForm profile={profile} onEditProfile={handleEditProfile} />
 
                     <div className="max-w-[526px]">
-                        <OrderSummary />
+                        <OrderSummary profileCity={profile?.city} />
                         <PaymentOptions />
                         <CouponSection />
                         <button 
@@ -178,11 +178,6 @@ const BillingForm: React.FC<{ profile: UserProfile | null; onEditProfile: () => 
                 </div>
 
                 <div>
-                    <label className="block text-gray-400 mb-2">Company Name</label>
-                    <input type="text" className="w-full bg-secondary border rounded-sm p-2.5" />
-                </div>
-
-                <div>
                     <label className="block text-gray-400 mb-2">
                         Street Address <span className="text-red-500">*</span>
                     </label>
@@ -193,11 +188,6 @@ const BillingForm: React.FC<{ profile: UserProfile | null; onEditProfile: () => 
                         className="w-full border bg-secondary rounded-sm p-2.5 opacity-60"
                         placeholder={profile?.address ? profile.address : "Not filled"}
                     />
-                </div>
-
-                <div>
-                    <label className="block text-gray-400 mb-2">Apartment, floor, etc. (optional)</label>
-                    <input type="text" className="w-full border bg-secondary rounded-sm p-2.5" />
                 </div>
 
                 <div>
@@ -250,39 +240,48 @@ const BillingForm: React.FC<{ profile: UserProfile | null; onEditProfile: () => 
     );
 };
 
-const OrderSummary: React.FC = () => {
+const OrderSummary: React.FC<{ profileCity?: string }> = ({ profileCity }) => {
+    const { cart } = useSelector((state: RootState) => state.cart);
+    const subtotal = cart.reduce((acc, item) => acc + item.subtotal, 0);
+    const shipping = profileCity?.toLowerCase().includes("dhaka") ? 100 : 150;
+    const total = subtotal + shipping;
+
     return (
         <div className="w-full mb-8 space-y-6">
-            <div className="space-y-8 border-b pb-3">
-                <div className="flex justify-between items-center">
-                    <span className="flex items-center space-x-5.5">
-                        <img src={monitor} alt="Monitor" className="w-[54px] h-[54px]" />
-                        <p>LCD Monitor</p>
-                    </span>
-                    <p>$650</p>
-                </div>
-
-                <div className="flex justify-between items-center">
-                    <span className="flex items-center space-x-5.5">
-                        <img src={gamepad} alt="Gamepad" className="w-[54px] h-[54px]" />
-                        <p>H1 Gamepad</p>
-                    </span>
-                    <p>$1100</p>
-                </div>
+            <div className="border-b pb-3">
+                <h2 className="text-3xl font-medium mb-6">Order Summary</h2>
+                {cart.length === 0 ? (
+                    <p className="text-sm text-gray-500">Your cart is empty.</p>
+                ) : (
+                    <div className="space-y-4">
+                        {cart.map((item) => (
+                            <div key={item.id} className="flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <img src={item.thumbnail} alt={item.title} className="w-[54px] h-[54px] object-cover rounded-sm" />
+                                    <div>
+                                        <p className="font-medium">{item.title}</p>
+                                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                                    </div>
+                                </div>
+                                <p className="font-medium">${item.subtotal.toFixed(2)}</p>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
-            <div className="space-y-4 mt-8 text-sm">
-                <div className="flex justify-between">
-                    <p>Subtotal:</p>
-                    <p>$1750</p>
+            <div className="space-y-3 px-4 py-4 bg-secondary rounded-sm">
+                <div className="flex justify-between text-sm text-gray-600">
+                    <span>Subtotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
-                    <p>Shipping:</p>
-                    <p>Free</p>
+                <div className="flex justify-between text-sm text-gray-600">
+                    <span>Shipping</span>
+                    <span>${shipping.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between font-semibold border-t pt-2">
-                    <p>Total:</p>
-                    <p>$1750</p>
+                <div className="flex justify-between pt-2 border-t border-gray-200 font-semibold text-base">
+                    <span>Total</span>
+                    <span>${total.toFixed(2)}</span>
                 </div>
             </div>
         </div>
@@ -334,7 +333,12 @@ const CouponSection: React.FC = () => {
                 placeholder="Coupon Code"
                 className="flex-1 border py-4 px-6 h-full rounded-sm"
             />
-            <Button2>Apply Coupon</Button2>
+            <button
+                type="button"
+                className="bg-button2 hover:bg-red-600 transition-all duration-300 text-white font-medium font-poppins px-6 py-4 rounded-sm"
+            >
+                Apply Coupon
+            </button>
         </div>
     );
 };
