@@ -103,14 +103,14 @@ const CheckOut: React.FC = () => {
                 <div className="grid md:grid-cols-2 gap-10 mt-20 justify-between">
                     <BillingForm profile={profile} onEditProfile={handleEditProfile} />
 
-                    <div className="max-w-[526px]">
+                    <div className="max-w-[526px] ">
                         <OrderSummary profileCity={profile?.city} />
                         <PaymentOptions />
                         <CouponSection />
                         <button 
                             onClick={handlePlaceOrder}
                             disabled={!isProfileComplete}
-                            className={`w-full bg-button2 hover:bg-red-600 transition-all duration-300 cursor-pointer text-white font-medium font-poppins px-8 lg:px-12 py-2 lg:py-4 rounded-sm ${
+                            className={`w-full bg-button2 hover:bg-red-600 transition-all duration-300 cursor-pointer text-white font-medium font-poppins px-8 lg:px-12 ml-5 lg:ml-0 py-2 lg:py-4 rounded-sm ${
                                 !isProfileComplete ? "opacity-50 cursor-not-allowed" : ""
                             }`}
                         >
@@ -137,7 +137,7 @@ export default CheckOut
 
 const BillingForm: React.FC<{ profile: UserProfile | null; onEditProfile: () => void }> = ({ profile, onEditProfile }) => {
     return (
-        <div className="max-w-[470px] space-y-4">
+        <div className=" pl-5 lg:pl-0 max-w-[470px] space-y-4">
             <div className="flex items-center justify-between mb-12">
                 <h2 className="text-4xl font-inter leading-7.5 tracking-wide font-medium">Billing Details</h2>
                 {!profile?.firstName && (
@@ -247,7 +247,7 @@ const OrderSummary: React.FC<{ profileCity?: string }> = ({ profileCity }) => {
     const total = subtotal + shipping;
 
     return (
-        <div className="w-full mb-8 space-y-6">
+        <div className=" pl-5 lg:pl-0 w-full mb-8 space-y-6">
             <div className="border-b pb-3">
                 <h2 className="text-3xl font-medium mb-6">Order Summary</h2>
                 {cart.length === 0 ? (
@@ -292,7 +292,7 @@ const PaymentOptions: React.FC = () => {
     const [selected, setSelected] = useState("cod");
 
     return (
-        <div className="space-y-3">
+        <div className="pl-5 lg:pl-0 space-y-3">
             <label className="flex items-center justify-between space-x-2">
 
                 <div className="flex items-center gap-4">
@@ -327,7 +327,7 @@ const PaymentOptions: React.FC = () => {
 
 const CouponSection: React.FC = () => {
     return (
-        <div className="flex items-center h-14 mb-8 gap-3 mt-8">
+        <div className=" pl-5 lg:pl-0 flex items-center h-14 mb-8 gap-3 mt-8">
             <input
                 type="text"
                 placeholder="Coupon Code"

@@ -26,7 +26,7 @@ export default function NavBar() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/');
+      navigate('/auth/login');
       setIsMobileMenuOpen(false);
     } catch (error) {
       console.error('Logout failed:', error);
@@ -167,6 +167,43 @@ export default function NavBar() {
                   </span>
                 </button>
               </Link>
+
+              <DropdownMenu>
+                    <DropdownMenuTrigger className='focus:outline-0 w-7 h-7 flex items-center justify-center   rounded-full data-[state=open]:bg-button2 data-[state=open]:text-white cursor-pointer  '><Icon icon="lucide:user" width="30" height="30" /></DropdownMenuTrigger>
+                    <DropdownMenuContent align='end' className='min-w-56 pt-4.5 pl-5 pb-2.5 pr-3 bg-[rgba(0,0,0,0.50)] backdrop-blur-[100px] text-white  border-none space-y-[13px]' >
+                      {currentUser ? (
+                        <>
+                          <DropdownMenuLabel>
+                            <p className='text-sm text-gray-300'>{currentUser.email}</p>
+                          </DropdownMenuLabel>
+
+                          <DropdownMenuLabel >
+                            <Link className='flex items-center justify-start gap-4' to={"/account"}><Icon icon="lucide:user" width="30" height="30" />Manage My Account</Link>
+                          </DropdownMenuLabel>
+
+                          <DropdownMenuItem>
+                            <Link className='flex items-center justify-start gap-4' to={"/#"}><Icon icon="mage:shopping-bag" width="30" height="30" />My Order</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Link className='flex items-center justify-start gap-4' to={"/#"}><Icon icon="material-symbols-light:cancel-outline" width="30" height="30" />My Cancellation</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Link className='flex items-center justify-start gap-4' to={"/#"}><Icon icon="stash:star" width="30" height="30" /> My Reviews</Link>
+                          </DropdownMenuItem>
+                        </>
+                      ) : (
+                        <>
+                          <DropdownMenuLabel>
+                            <Link className='flex items-center justify-start gap-4' to={"/auth/login"}><Icon icon="lucide:user" width="30" height="30" />Sign In</Link>
+                          </DropdownMenuLabel>
+                          <DropdownMenuLabel>
+                            <Link className='flex items-center justify-start gap-4' to={"/auth/signup"}><Icon icon="lucide:user-plus" width="30" height="30" />Create Account</Link>
+                          </DropdownMenuLabel>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
             </div>
           </div>
 

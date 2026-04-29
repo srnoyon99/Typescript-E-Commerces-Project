@@ -143,7 +143,7 @@ const Account: React.FC = () => {
 
     return (
         <section className="py-16">
-            <div className="container mx-auto px-4">
+            <div className="container mx-auto px-4 ">
                 {/* Breadcrumb + Welcome */}
                 <div className="flex items-center justify-between text-sm mb-10">
                     <Breadcrumb>
@@ -170,9 +170,9 @@ const Account: React.FC = () => {
                 </div>
 
                 {/* Account Container */}
-                <div className="grid grid-cols-12 gap-8 font-poppins">
+                <div className="grid lg:grid-cols-12 gap-8 font-poppins">
                     {/* Sidebar */}
-                    <aside className="col-span-3 space-y-6">
+                    <aside className=" row-end-3 lg:row-end-1 lg:col-span-3 space-y-6">
                         <div>
                             <h3 className="font-medium mb-4">Manage My Account</h3>
                             <ul className="space-y-2 pl-8.5">
