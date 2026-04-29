@@ -37,18 +37,45 @@ const Account: React.FC = () => {
     const [tempProfile, setTempProfile] = useState<UserProfile>(profile);
     const fromPath = (location.state as { from?: string } | undefined)?.from;
 
-    // Load profile from localStorage on mount
+    // Load profile from localStorage, but reset when a new Gmail logs in
     useEffect(() => {
         const savedProfile = localStorage.getItem("userProfile");
+        const currentEmail = currentUser?.email || "";
+
         if (savedProfile) {
-            const loadedProfile = JSON.parse(savedProfile);
+            const loadedProfile = JSON.parse(savedProfile) as UserProfile;
+
+            if (loadedProfile.email && currentEmail && loadedProfile.email !== currentEmail) {
+                // New Gmail login: clear old profile and start fresh for the new email
+                const initialProfile: UserProfile = {
+                    firstName: "",
+                    lastName: "",
+                    email: currentEmail,
+                    number: "",
+                    address: "",
+                    city: "",
+                    postalCode: "",
+                };
+                setProfile(initialProfile);
+                setTempProfile(initialProfile);
+                localStorage.setItem("userProfile", JSON.stringify(initialProfile));
+                return;
+            }
+
             setProfile(loadedProfile);
             setTempProfile(loadedProfile);
-        } else if (currentUser?.email) {
-            // Auto-populate email from Firebase
+            return;
+        }
+
+        if (currentEmail) {
             const initialProfile: UserProfile = {
-                ...profile,
-                email: currentUser.email,
+                firstName: "",
+                lastName: "",
+                email: currentEmail,
+                number: "",
+                address: "",
+                city: "",
+                postalCode: "",
             };
             setProfile(initialProfile);
             setTempProfile(initialProfile);
