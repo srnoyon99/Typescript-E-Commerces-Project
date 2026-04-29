@@ -47,8 +47,7 @@ const ProductDetails: React.FC = () => {
 	const [imageIndex, setImageIndex] = useState(0);
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const location = useLocation();
-	const { currentUser } = useAuth();
+
 	// console.log(id);
 
 	const { data, isLoading } = useGetProductByIdQuery(id!);
@@ -273,6 +272,7 @@ const ProductActions = ({
 	const isExist2 = wishList.find((item) => item.id === data.id);
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const { currentUser } = useAuth();
 
 	const handleAddToWishlist = (product: Product | ProductCart) => {
 		if (!currentUser) {
