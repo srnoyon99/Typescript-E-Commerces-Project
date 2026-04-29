@@ -77,9 +77,23 @@ const Account: React.FC = () => {
 
                     {/* Profile Edit Form */}
                     <div className="col-span-9 font-poppins bg-white shadow-contact rounded-sm py-10 px-20">
+
+                        <div className="flex items-center justify-between ">
+
+                        <div>
                         <h2 className="text-xl font-medium text-button2 mb-6">
                             Edit Your Profile
                         </h2>
+                        </div>
+
+                        <div>
+                            <svg className="cursor-pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>
+                            </svg>
+                        </div>
+
+                        </div>
 
                         <form className="grid grid-cols-2 gap-6">
                             {/* First Name */}
@@ -118,8 +132,22 @@ const Account: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Address */}
+                            {/* Number Section */}
                             <div>
+                                <label className="block text-sm  mb-2">
+                                    Number <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
+                                    placeholder="Your Number"
+                                />
+                            </div>
+                            
+                        </form>
+
+                         {/* Address */}
+                            <div className="mt-6">
                                 <label className="block text-sm  mb-2">
                                     Address <span className="text-red-500">*</span>
                                 </label>
@@ -130,30 +158,33 @@ const Account: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Password Section */}
-                            <div className="col-span-2 mt-4">
-                                <h3 className=" text-gray-800 mb-3">
-                                    Password Changes
-                                </h3>
-
-                                <div className="space-y-4">
+                            <form className="grid grid-cols-2 gap-6 mt-6">
+                                {/* City */}
+                                <div>
+                                    <label className="block text-sm  mb-2">
+                                        City <span className="text-red-500">*</span>
+                                    </label>
                                     <input
-                                        type="password"
-                                        placeholder="Current Password"
+                                        type="text"
+                                        placeholder="City"
                                         className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
-                                    />
-                                    <input
-                                        type="password"
-                                        placeholder="New Password"
-                                        className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
-                                    />
-                                    <input
-                                        type="password"
-                                        placeholder="Confirm New Password"
-                                        className="w-full bg-gray-100 h-[50px] px-4 text-gray-600 outline-none"
                                     />
                                 </div>
-                            </div>
+
+                                {/* Postal Code */}
+                                <div>
+                                    <label className="block text-sm  mb-2">
+                                        Postal Code <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="Postal Code"
+                                        className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
+                                    />
+                                </div>
+                            </form>
+
+
 
                             {/* Buttons */}
                             <div className="col-span-2 flex justify-end gap-8 mt-6">
@@ -165,7 +196,7 @@ const Account: React.FC = () => {
                                 </button>
                                 <Button2 className="">Save Change</Button2>
                             </div>
-                        </form>
+
                     </div>
                 </div>
             </div>

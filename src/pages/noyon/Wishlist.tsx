@@ -12,8 +12,9 @@ import { Bounce, toast } from "react-toastify";
 import Slider from "react-slick";
 import ProductCard from "../../components/ProductCard";
 import { useRef } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { selectedCategory } from "../../features/category/categorySlice";
+import { useAuth } from "@/hooks/useAuth";
 
 const Wishlist: React.FC = () => {
 	const sliderRef = useRef<any>(null);
@@ -24,7 +25,16 @@ const Wishlist: React.FC = () => {
 	);
 
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const { currentUser } = useAuth();
+
 	const handleAddToAllCart = () => {
+		if (!currentUser) {
+			navigate('/auth/login', { state: { from: location } });
+			return;
+		}
+
 		dispatch(
 			moveAllToBag(
 				wishList.map((p) => ({ ...p, quantity: 1, subtotal: p.price }))
@@ -67,7 +77,6 @@ const Wishlist: React.FC = () => {
 		categoriesData.push(...categoryProducts.slice(0, 3));
 	});
 
-	const navigate = useNavigate();
 	const handleShop = () => {
 		navigate("/shop");
 		dispatch(selectedCategory(""));
@@ -167,9 +176,12 @@ const ProductWishlist = ({
 }: ProductCardProps) => {
 	const { cart } = useSelector((state: RootState) => state.cart);
 	const isExistCart = cart.find((item) => item.id === product.id);
+	const { currentUser } = useAuth();
+	const navigate = useNavigate();
+	const location = useLocation();
 
 	const notify = () =>
-		toast.success("❤ Successfuly add to wishlist", {
+		toast.success("❤ Successfully added to cart", {
 			position: "top-center",
 			autoClose: 5000,
 			hideProgressBar: false,
@@ -179,9 +191,16 @@ const ProductWishlist = ({
 			progress: undefined,
 			theme: "light",
 			transition: Bounce,
-		});
+	});
+
+	const dispatch = useDispatch();
 
 	const handleAddToCart = (product: Product) => {
+		if (!currentUser) {
+			navigate('/auth/login', { state: { from: location } });
+			return;
+		}
+
 		if (!isExistCart) {
 			dispatch(removeWishlist(product.id));
 			notify();
@@ -189,7 +208,6 @@ const ProductWishlist = ({
 		}
 	};
 
-	const dispatch = useDispatch();
 	return (
 		<div className="max-w-[270px] font-poppins">
 			<div className="group relative  bg-secondary dark:bg-slate-400  cursor-pointer rounded-sm h-[250px] mb-4   overflow-hidden flex items-center justify-center py-9 px-10">

@@ -1,7 +1,8 @@
 import { Heart, Eye } from 'lucide-react';
 import type { Product, ProductCart } from '../types';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '@/hooks/useAuth';
 import { addToWishList, removeWishlist } from '../features/wishlist/wishlistSlice';
 import type { RootState } from '../store/store';
 import { addTocart, removecart } from '../features/cart/cartSlice';
@@ -26,14 +27,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   //  const [addToCartApi] = useAddToCartApiMutation()
 
-  const user = {
-    id: 1,
-    name: "John Doe",
-    password: "password123",
-    email: "admin@example.com"
-  };
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const notify = () => toast.success('❤ Successfuly add to wishlist', {
+  const location = useLocation();
+  const { currentUser } = useAuth();
+
+  const notify = () => toast.success('❤ Successfully added to wishlist', {
     position: "top-center",
     autoClose: 5000,
     hideProgressBar: false,
@@ -46,38 +45,36 @@ export default function ProductCard({ product }: ProductCardProps) {
   });
 
   const handleAddToWishlist = (product: ProductCart) => {
-    if (!user) {
-      alert("Please login to add items to wishlist");
-      navigate('/login');
+    if (!currentUser) {
+      toast.info('Please login to add items to wishlist');
+      navigate('/auth/login', { state: { from: location } });
       return;
-    } else {
-      if (isExistCart) {
-        notify()
-        dispatch(removecart(product.id));
-        dispatch(addToWishList({ ...product, quantity: 1, subtotal: product.price } as ProductCart));
-      } else {
-        dispatch(addToWishList({ ...product, quantity: 1, subtotal: product.price } as ProductCart));
-      }
     }
-  }
-  const handleCartAdd = (product: ProductCart) => {
-    if (!user) {
-      alert("Please login to add items to wishlist");
-      navigate('/login');
-      return;
-    } else {
-      if (!isExistCart) {
-        dispatch(addTocart({ ...product, quantity: 1, subtotal: product.price }));
-        dispatch(removeWishlist(product.id));
-      } else {
-        dispatch(removecart(product.id));
-      }
-    }
-  }
 
+    if (isExistCart) {
+      notify();
+      dispatch(removecart(product.id));
+    }
+
+    dispatch(addToWishList({ ...product, quantity: 1, subtotal: product.price } as ProductCart));
+  };
+
+  const handleCartAdd = (product: ProductCart) => {
+    if (!currentUser) {
+      toast.info('Please login to add items to cart');
+      navigate('/auth/login', { state: { from: location } });
+      return;
+    }
+
+    if (!isExistCart) {
+      dispatch(addTocart({ ...product, quantity: 1, subtotal: product.price }));
+      dispatch(removeWishlist(product.id));
+    } else {
+      dispatch(removecart(product.id));
+    }
+  };
 
   const navigation = useNavigate();
-  const dispatch = useDispatch();
 
 
   return (

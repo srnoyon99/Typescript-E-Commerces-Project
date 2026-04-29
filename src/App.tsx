@@ -40,13 +40,7 @@ const router = createBrowserRouter([
 	// Main
 	{
 		path: "/",
-		Component: () => {
-			return (
-				<ProtectedRoute>
-					<MainLayout />
-				</ProtectedRoute>
-			)
-		},
+		Component: MainLayout,
 		children: [
 			{ index: true, Component: Home },
 			{ path: "about", Component: About },
@@ -54,10 +48,15 @@ const router = createBrowserRouter([
 			{ path: "account", Component: Account },
 			{ path: "cart", Component: Cart },
 			{ path: "shop", Component: Shop },
-			{ path: "signup", Component: Signup },
-			{ path: "login", Component: Login },
 			{ path: "product/details/:id", Component: ProductDetails },
-			{ path: "checkout", Component: CheckOut },
+			{
+				path: "checkout",
+				Component: () => (
+					<ProtectedRoute>
+						<CheckOut />
+					</ProtectedRoute>
+				),
+			},
 			{ path: "wishlist", Component: Wishlist },
 			{ path: "*", Component: ErrorPages },
 			{ path: "product/search", Component: SearchPage },

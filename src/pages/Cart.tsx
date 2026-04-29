@@ -8,7 +8,7 @@ import {
 } from "../components/ui/breadcrumb";
 import { Slash, X } from 'lucide-react';
 import Button2 from '../components/Button2';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { decrementQuantity, incrementQuantity, removecart } from '../features/cart/cartSlice';
@@ -150,6 +150,7 @@ export default Cart;
 
 
 const CartTotalBox: React.FC = () => {
+    const navigate = useNavigate();
     const { cart } = useSelector((state: RootState) => state.cart);
     const subtotal = cart.reduce((acc, item) => acc + item.subtotal, 0);
     // Example total (650*1 + 550*2 = 1750) 
@@ -158,7 +159,9 @@ const CartTotalBox: React.FC = () => {
     // Example shipping cost 
     const total = subtotal + shipping;
 
-
+    const handleProceedToCheckout = () => {
+        navigate('/checkout');
+    };
 
     return (
         <div className='flex justify-end font-poppins mb-20 '>
@@ -184,7 +187,7 @@ const CartTotalBox: React.FC = () => {
                     <p className='font-medium'>Total:</p>
                     <p className='font-medium'>${total.toFixed(2)}</p>
                 </div> {/* Process to Checkout Button (Red/Primary Color) */}
-                <Button2 className="w-full"> Proceed To Checkout </Button2>
+                <Button2 onClick={handleProceedToCheckout} className="w-full">Proceed To Checkout</Button2>
             </div>
         </div>);
 }

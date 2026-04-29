@@ -2,11 +2,12 @@ import React, { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react';
 import { google, signup } from '../../constant/constant';
 import Button1 from '../../components/Button1';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useLocation } from 'react-router';
 import { useAuth } from '../../hooks/useAuth';
 
 const Login: React.FC = () => {
      const navigate = useNavigate();
+     const location = useLocation();
      const { login, gmailLogin, error } = useAuth();
 
      const [email, setEmail] = useState('');
@@ -18,6 +19,8 @@ const Login: React.FC = () => {
      const togglePasswordVisibility = () => {
           setShowPassword(!showPassword);
      };
+
+     const fromPath = (location.state as { from?: { pathname?: string } } | undefined)?.from?.pathname || '/';
 
      const handleLogin = async (e: React.FormEvent) => {
           e.preventDefault();
@@ -35,7 +38,7 @@ const Login: React.FC = () => {
                if (localStorage.getItem('requireEmailVerification')) {
                     navigate('/auth/login?verified=false');
                } else {
-                    navigate('/');
+                    navigate(fromPath, { replace: true });
                }
           } catch (err: any) {
                const errorMessage = err.message || 'Login failed. Please try again.';

@@ -26,7 +26,7 @@ export default function NavBar() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/auth/login');
+      navigate('/');
       setIsMobileMenuOpen(false);
     } catch (error) {
       console.error('Logout failed:', error);

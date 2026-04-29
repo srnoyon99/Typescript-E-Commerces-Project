@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useLocation } from "react-router";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -34,6 +34,7 @@ import {
 	addToWishList,
 } from "../../features/wishlist/wishlistSlice";
 import { selectedCategory } from "../../features/category/categorySlice";
+import { useAuth } from "@/hooks/useAuth";
 
 type Size = {
 	id: string;
@@ -46,6 +47,8 @@ const ProductDetails: React.FC = () => {
 	const [imageIndex, setImageIndex] = useState(0);
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const location = useLocation();
+	const { currentUser } = useAuth();
 	// console.log(id);
 
 	const { data, isLoading } = useGetProductByIdQuery(id!);
@@ -272,43 +275,35 @@ const ProductActions = ({
 	const navigate = useNavigate();
 
 	const handleAddToWishlist = (product: Product | ProductCart) => {
+		if (!currentUser) {
+			alert("Please login to add items to wishlist");
+			navigate("/auth/login", { state: { from: location } });
+			return;
+		}
+
 		if (isExistCart) {
 			dispatch(removecart(product.id));
-			dispatch(
-				addToWishList({
-					...product,
-					quantity: 1,
-					subtotal: product.price,
-				} as ProductCart)
-			);
-		} else {
-			dispatch(
-				addToWishList({
-					...product,
-					quantity: 1,
-					subtotal: product.price,
-				} as ProductCart)
-			);
 		}
-	};
 
-	const user = {
-		id: 1,
-		name: "John Doe",
-		password: "password123",
-		email: "admin@example.com",
+		dispatch(
+			addToWishList({
+				...product,
+				quantity: 1,
+				subtotal: product.price,
+			} as ProductCart)
+		);
 	};
 
 	const handleCartAdd = (product: Product | ProductCart) => {
-		if (!user) {
-			alert("Please login to add items to wishlist");
-			navigate("/login");
+		if (!currentUser) {
+			alert("Please login to add items to cart");
+			navigate("/auth/login", { state: { from: location } });
 			return;
-		} else {
-			if (!isExistCart) {
-				dispatch(addTocart({ ...product, quantity, subtotal: product.price }));
-				dispatch(removeWishlist(product.id));
-			}
+		}
+
+		if (!isExistCart) {
+			dispatch(addTocart({ ...product, quantity, subtotal: product.price }));
+			dispatch(removeWishlist(product.id));
 		}
 	};
 
