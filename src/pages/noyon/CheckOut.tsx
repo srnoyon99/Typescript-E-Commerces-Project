@@ -1,12 +1,60 @@
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "../../components/ui/breadcrumb"
 import { SlashIcon } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Button2 from "../../components/Button2"
 import { gamepad, monitor } from "../../constant/constant"
 
 
+interface UserProfile {
+    firstName: string;
+    lastName: string;
+    email: string;
+    number: string;
+    address: string;
+    city: string;
+    postalCode: string;
+}
+
 const CheckOut: React.FC = () => {
+    const navigate = useNavigate();
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [isProfileComplete, setIsProfileComplete] = useState(false);
+
+    useEffect(() => {
+        const savedProfile = localStorage.getItem("userProfile");
+        if (savedProfile) {
+            const loadedProfile = JSON.parse(savedProfile);
+            setProfile(loadedProfile);
+            
+            // Check if all required fields are filled
+            const isComplete = 
+                loadedProfile.firstName?.trim() &&
+                loadedProfile.lastName?.trim() &&
+                loadedProfile.email?.trim() &&
+                loadedProfile.number?.trim() &&
+                loadedProfile.address?.trim() &&
+                loadedProfile.city?.trim() &&
+                loadedProfile.postalCode?.trim();
+            
+            setIsProfileComplete(!!isComplete);
+        }
+    }, []);
+
+    const handleEditProfile = () => {
+        navigate("/account");
+    };
+
+    const handlePlaceOrder = () => {
+        if (!isProfileComplete) {
+            alert("Please complete your profile information before placing an order.");
+            handleEditProfile();
+            return;
+        }
+        // Proceed with order placement logic
+        alert("Order placed successfully!");
+    };
+
     return (
         <section>
             <div className="container pt-20">
@@ -53,13 +101,29 @@ const CheckOut: React.FC = () => {
                 </Breadcrumb>
 
                 <div className="grid md:grid-cols-2 gap-10 mt-20 justify-between">
-                    <BillingForm />
+                    <BillingForm profile={profile} onEditProfile={handleEditProfile} />
 
                     <div className="max-w-[526px]">
                         <OrderSummary />
                         <PaymentOptions />
                         <CouponSection />
-                        <Button2>Place Order</Button2>
+                        <button 
+                            onClick={handlePlaceOrder}
+                            disabled={!isProfileComplete}
+                            className={`w-full bg-button2 hover:bg-red-600 transition-all duration-300 cursor-pointer text-white font-medium font-poppins px-8 lg:px-12 py-2 lg:py-4 rounded-sm ${
+                                !isProfileComplete ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                        >
+                            {isProfileComplete ? "Place Order" : "Complete Profile to Order"}
+                        </button>
+                        {!isProfileComplete && (
+                            <button
+                                onClick={handleEditProfile}
+                                className="w-full mt-3 border border-button2 text-button2 py-3 rounded-sm hover:bg-button2 hover:text-white transition"
+                            >
+                                Edit Profile
+                            </button>
+                        )}
                     </div>
 
                 </div>
@@ -71,57 +135,108 @@ const CheckOut: React.FC = () => {
 export default CheckOut
 
 
-const BillingForm: React.FC = () => {
+const BillingForm: React.FC<{ profile: UserProfile | null; onEditProfile: () => void }> = ({ profile, onEditProfile }) => {
     return (
         <div className="max-w-[470px] space-y-4">
-            <h2 className="text-4xl font-inter leading-7.5 tracking-wide font-medium mb-12">Billing Details</h2>
+            <div className="flex items-center justify-between mb-12">
+                <h2 className="text-4xl font-inter leading-7.5 tracking-wide font-medium">Billing Details</h2>
+                {!profile?.firstName && (
+                    <button
+                        onClick={onEditProfile}
+                        className="text-button2 text-sm font-medium hover:underline"
+                    >
+                        Edit Profile
+                    </button>
+                )}
+            </div>
 
             <form className="space-y-8 font-poppins">
                 <div>
-                    <label className="block  text-gray-400  mb-2">
-                        First Name<span className="text-red-500">*</span>
+                    <label className="block text-gray-400 mb-2">
+                        First Name <span className="text-red-500">*</span>
                     </label>
+                    <input
+                        type="text"
+                        value={profile?.firstName || ""}
+                        readOnly
+                        className="w-full bg-secondary border rounded-sm p-2.5 opacity-60"
+                        placeholder={profile?.firstName ? profile.firstName : "Not filled"}
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-gray-400 mb-2">
+                        Last Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        value={profile?.lastName || ""}
+                        readOnly
+                        className="w-full bg-secondary border rounded-sm p-2.5 opacity-60"
+                        placeholder={profile?.lastName ? profile.lastName : "Not filled"}
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-gray-400 mb-2">Company Name</label>
                     <input type="text" className="w-full bg-secondary border rounded-sm p-2.5" />
                 </div>
 
                 <div>
-                    <label className="block  text-gray-400  mb-2">Company Name</label>
-                    <input type="text" className="w-full bg-secondary border rounded-sm p-2.5" />
+                    <label className="block text-gray-400 mb-2">
+                        Street Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        value={profile?.address || ""}
+                        readOnly
+                        className="w-full border bg-secondary rounded-sm p-2.5 opacity-60"
+                        placeholder={profile?.address ? profile.address : "Not filled"}
+                    />
                 </div>
 
                 <div>
-                    <label className="block  text-gray-400  mb-2">
-                        Street Address<span className="text-red-500">*</span>
-                    </label>
+                    <label className="block text-gray-400 mb-2">Apartment, floor, etc. (optional)</label>
                     <input type="text" className="w-full border bg-secondary rounded-sm p-2.5" />
                 </div>
 
                 <div>
-                    <label className="block  text-gray-400  mb-2">
-                        Apartment, floor, etc. (optional)
+                    <label className="block text-gray-400 mb-2">
+                        Town/City <span className="text-red-500">*</span>
                     </label>
-                    <input type="text" className="w-full border bg-secondary rounded-sm p-2.5" />
+                    <input
+                        type="text"
+                        value={profile?.city || ""}
+                        readOnly
+                        className="w-full border bg-secondary rounded-sm p-2.5 opacity-60"
+                        placeholder={profile?.city ? profile.city : "Not filled"}
+                    />
                 </div>
 
                 <div>
-                    <label className="block  text-gray-400  mb-2">
-                        Town/City<span className="text-red-500">*</span>
+                    <label className="block text-gray-400 mb-2">
+                        Phone Number <span className="text-red-500">*</span>
                     </label>
-                    <input type="text" className="w-full border bg-secondary rounded-sm p-2.5" />
+                    <input
+                        type="text"
+                        value={profile?.number || ""}
+                        readOnly
+                        className="w-full border bg-secondary rounded-sm p-2.5 opacity-60"
+                        placeholder={profile?.number ? profile.number : "Not filled"}
+                    />
                 </div>
 
                 <div>
-                    <label className="block  text-gray-400  mb-2">
-                        Phone Number<span className="text-red-500">*</span>
+                    <label className="block text-gray-400 mb-2">
+                        Email Address <span className="text-red-500">*</span>
                     </label>
-                    <input type="text" className="w-full border bg-secondary rounded-sm p-2.5" />
-                </div>
-
-                <div>
-                    <label className="block  text-gray-400  mb-2">
-                        Email Address<span className="text-red-500">*</span>
-                    </label>
-                    <input type="email" className="w-full border bg-secondary rounded-sm p-2.5" />
+                    <input
+                        type="email"
+                        value={profile?.email || ""}
+                        readOnly
+                        className="w-full border bg-secondary rounded-sm p-2.5 opacity-60"
+                        placeholder={profile?.email ? profile.email : "Not filled"}
+                    />
                 </div>
 
                 <div className="flex items-center space-x-2">

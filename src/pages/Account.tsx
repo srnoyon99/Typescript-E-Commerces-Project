@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -7,10 +7,93 @@ import {
     BreadcrumbSeparator,
 } from "../components/ui/breadcrumb";
 import { SlashIcon } from "lucide-react";
-import Button2 from "../components/Button2";
 import { Link } from "react-router";
+import { useAuth } from "@/hooks/useAuth";
+
+interface UserProfile {
+    firstName: string;
+    lastName: string;
+    email: string;
+    number: string;
+    address: string;
+    city: string;
+    postalCode: string;
+}
 
 const Account: React.FC = () => {
+    const { currentUser } = useAuth();
+    const [isEditing, setIsEditing] = useState(false);
+    const [profile, setProfile] = useState<UserProfile>({
+        firstName: "",
+        lastName: "",
+        email: currentUser?.email || "",
+        number: "",
+        address: "",
+        city: "",
+        postalCode: "",
+    });
+    const [tempProfile, setTempProfile] = useState<UserProfile>(profile);
+
+    // Load profile from localStorage on mount
+    useEffect(() => {
+        const savedProfile = localStorage.getItem("userProfile");
+        if (savedProfile) {
+            const loadedProfile = JSON.parse(savedProfile);
+            setProfile(loadedProfile);
+            setTempProfile(loadedProfile);
+        } else if (currentUser?.email) {
+            // Auto-populate email from Firebase
+            const initialProfile: UserProfile = {
+                ...profile,
+                email: currentUser.email,
+            };
+            setProfile(initialProfile);
+            setTempProfile(initialProfile);
+        }
+    }, [currentUser]);
+
+    // Extract name from email if it contains a pattern like "firstname.lastname@domain.com"
+    const extractNameFromEmail = (email: string) => {
+        const match = email.match(/^([^.]+)\.([^@]+)@/);
+        if (match) {
+            return { firstName: match[1], lastName: match[2] };
+        }
+        return { firstName: "", lastName: "" };
+    };
+
+    const handleEditClick = () => {
+        setIsEditing(true);
+        setTempProfile(profile);
+    };
+
+    const handleCancel = () => {
+        setIsEditing(false);
+        setTempProfile(profile);
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setTempProfile({
+            ...tempProfile,
+            [name]: value,
+        });
+    };
+
+    const handleSaveChanges = () => {
+        // Validate required fields
+        if (!tempProfile.firstName.trim() || !tempProfile.lastName.trim()) {
+            alert("First Name and Last Name are required");
+            return;
+        }
+
+        setProfile(tempProfile);
+        localStorage.setItem("userProfile", JSON.stringify(tempProfile));
+        setIsEditing(false);
+    };
+
+    const userNameFromEmail = extractNameFromEmail(profile.email);
+    const displayName = profile.firstName || userNameFromEmail.firstName || "User";
+
     return (
         <section className="py-16">
             <div className="container mx-auto px-4">
@@ -20,22 +103,22 @@ const Account: React.FC = () => {
                         <BreadcrumbList>
                             <BreadcrumbItem className="text-[14px]">
                                 <BreadcrumbLink>
-                                <Link to={"/"}>Home</Link>
+                                    <Link to={"/"}>Home</Link>
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                             <BreadcrumbSeparator>
                                 <SlashIcon className="w-3 h-3" />
                             </BreadcrumbSeparator>
                             <BreadcrumbItem>
-                                <BreadcrumbLink >
-                                <Link to={"/account"}>My Account</Link>
+                                <BreadcrumbLink>
+                                    <Link to={"/account"}>My Account</Link>
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
 
                     <span className="text-gray-700">
-                        Welcome! <span className="text-red-500 font-medium">{/* Account Name */}</span>
+                        Welcome! <span className="text-red-500 font-medium">{displayName}</span>
                     </span>
                 </div>
 
@@ -46,7 +129,7 @@ const Account: React.FC = () => {
                         <div>
                             <h3 className="font-medium mb-4">Manage My Account</h3>
                             <ul className="space-y-2 pl-8.5">
-                                <li className="hover:text-button2  text-gray-500 font-poppins cursor-pointer">
+                                <li className="hover:text-button2 text-gray-500 font-poppins cursor-pointer">
                                     My Profile
                                 </li>
                                 <li className="text-gray-500 hover:text-button2 cursor-pointer">
@@ -60,7 +143,7 @@ const Account: React.FC = () => {
 
                         <div>
                             <h3 className="font-medium mb-3">My Orders</h3>
-                            <ul className="space-y-2 pl-8.5 ">
+                            <ul className="space-y-2 pl-8.5">
                                 <li className="text-gray-500 hover:text-button2 cursor-pointer">
                                     My Returns
                                 </li>
@@ -77,126 +160,171 @@ const Account: React.FC = () => {
 
                     {/* Profile Edit Form */}
                     <div className="col-span-9 font-poppins bg-white shadow-contact rounded-sm py-10 px-20">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-medium text-button2 mb-6">
+                                    Edit Your Profile
+                                </h2>
+                            </div>
 
-                        <div className="flex items-center justify-between ">
-
-                        <div>
-                        <h2 className="text-xl font-medium text-button2 mb-6">
-                            Edit Your Profile
-                        </h2>
-                        </div>
-
-                        <div>
-                            <svg className="cursor-pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>
-                            </svg>
-                        </div>
-
+                            {!isEditing && (
+                                <button
+                                    onClick={handleEditClick}
+                                    className="cursor-pointer hover:opacity-75 transition"
+                                    title="Edit Profile"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                        <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
 
                         <form className="grid grid-cols-2 gap-6">
                             {/* First Name */}
                             <div>
-                                <label className="block text-sm  mb-2">
+                                <label className="block text-sm mb-2">
                                     First Name <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
+                                    name="firstName"
+                                    value={isEditing ? tempProfile.firstName : profile.firstName}
+                                    onChange={handleInputChange}
                                     placeholder="First name"
-                                    className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
+                                    disabled={!isEditing}
+                                    className="w-full bg-gray-100 h-[50px] px-4 text-gray-600 outline-none disabled:opacity-60"
                                 />
                             </div>
 
                             {/* Last Name */}
                             <div>
-                                <label className="block text-sm  mb-2">
+                                <label className="block text-sm mb-2">
                                     Last Name <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
+                                    name="lastName"
+                                    value={isEditing ? tempProfile.lastName : profile.lastName}
+                                    onChange={handleInputChange}
                                     placeholder="Last name"
-                                    className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
+                                    disabled={!isEditing}
+                                    className="w-full bg-gray-100 h-[50px] px-4 text-gray-600 outline-none disabled:opacity-60"
                                 />
                             </div>
 
                             {/* Email */}
                             <div>
-                                <label className="block text-sm  mb-2">
+                                <label className="block text-sm mb-2">
                                     Email <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="email"
+                                    name="email"
+                                    value={profile.email}
+                                    disabled
                                     placeholder="Your email"
-                                    className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
+                                    className="w-full bg-gray-100 h-[50px] px-4 text-gray-600 outline-none opacity-60"
                                 />
                             </div>
 
-                            {/* Number Section */}
+                            {/* Phone Number */}
                             <div>
-                                <label className="block text-sm  mb-2">
-                                    Number <span className="text-red-500">*</span>
+                                <label className="block text-sm mb-2">
+                                    Phone Number <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
-                                    className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
+                                    name="number"
+                                    value={isEditing ? tempProfile.number : profile.number}
+                                    onChange={handleInputChange}
+                                    disabled={!isEditing}
+                                    className="w-full bg-gray-100 h-[50px] px-4 text-gray-600 outline-none disabled:opacity-60"
                                     placeholder="Your Number"
                                 />
                             </div>
-                            
                         </form>
 
-                         {/* Address */}
-                            <div className="mt-6">
-                                <label className="block text-sm  mb-2">
-                                    Address <span className="text-red-500">*</span>
+                        {/* Address */}
+                        <div className="mt-6">
+                            <label className="block text-sm mb-2">
+                                Address <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                name="address"
+                                value={isEditing ? tempProfile.address : profile.address}
+                                onChange={handleInputChange}
+                                disabled={!isEditing}
+                                className="w-full bg-gray-100 h-[50px] px-4 text-gray-600 outline-none disabled:opacity-60"
+                                placeholder="Your Address"
+                            />
+                        </div>
+
+                        <form className="grid grid-cols-2 gap-6 mt-6">
+                            {/* City */}
+                            <div>
+                                <label className="block text-sm mb-2">
+                                    City <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
-                                    className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
-                                    placeholder="Your Address"
+                                    name="city"
+                                    value={isEditing ? tempProfile.city : profile.city}
+                                    onChange={handleInputChange}
+                                    disabled={!isEditing}
+                                    placeholder="City"
+                                    className="w-full bg-gray-100 h-[50px] px-4 text-gray-600 outline-none disabled:opacity-60"
                                 />
                             </div>
 
-                            <form className="grid grid-cols-2 gap-6 mt-6">
-                                {/* City */}
-                                <div>
-                                    <label className="block text-sm  mb-2">
-                                        City <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="City"
-                                        className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
-                                    />
-                                </div>
+                            {/* Postal Code */}
+                            <div>
+                                <label className="block text-sm mb-2">
+                                    Postal Code <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="postalCode"
+                                    value={isEditing ? tempProfile.postalCode : profile.postalCode}
+                                    onChange={handleInputChange}
+                                    disabled={!isEditing}
+                                    placeholder="Postal Code"
+                                    className="w-full bg-gray-100 h-[50px] px-4 text-gray-600 outline-none disabled:opacity-60"
+                                />
+                            </div>
+                        </form>
 
-                                {/* Postal Code */}
-                                <div>
-                                    <label className="block text-sm  mb-2">
-                                        Postal Code <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="Postal Code"
-                                        className="w-full bg-gray-100 h-[50px]  px-4 text-gray-600 outline-none"
-                                    />
-                                </div>
-                            </form>
-
-
-
-                            {/* Buttons */}
+                        {/* Buttons */}
+                        {isEditing && (
                             <div className="col-span-2 flex justify-end gap-8 mt-6">
                                 <button
                                     type="button"
+                                    onClick={handleCancel}
                                     className="text-gray-600 hover:text-black font-medium"
                                 >
                                     Cancel
                                 </button>
-                                <Button2 className="">Save Change</Button2>
+                                <button
+                                    type="button"
+                                    onClick={handleSaveChanges}
+                                    className="bg-button2 hover:bg-red-600 transition-all duration-300 cursor-pointer text-white font-medium font-poppins px-8 lg:px-12 py-2 lg:py-4 rounded-sm"
+                                >
+                                    Save Change
+                                </button>
                             </div>
-
+                        )}
                     </div>
                 </div>
             </div>
